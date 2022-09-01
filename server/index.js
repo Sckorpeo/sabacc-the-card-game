@@ -1,19 +1,32 @@
 const express = require('express');
 const path = require('path');
+const cors = require('cors');
 
-const server = express();
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require('socket.io');
+const io = new Server(server);
 
 // static middleware
-server.use('/public', express.static(path.join(__dirname, '..', 'public')));
-server.use(express.json());
+app.use(cors());
+app.use('/public', express.static(path.join(__dirname, '..', 'public')));
+app.use(express.json());
 
-server.get('/', (req, res) => {
+io.on('connection', (socket) => {
+    console.log('a user connected.');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+});
+
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 const port = process.env.PORT || 3000;
 
-server.listen(port, async () => {
+app.listen(port, async () => {
     try {
         console.log(`listening on port ${port}`);
     } catch (ex) {
@@ -21,4 +34,4 @@ server.listen(port, async () => {
     }
 });
 
-module.exports = server;
+module.exports = app;
