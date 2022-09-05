@@ -1,5 +1,5 @@
 // External Package Imports
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import io from 'socket.io-client';
 import { Provider } from 'react-redux';
@@ -10,6 +10,15 @@ import MainPage from './components/MainPage';
 import Chat from './components/Chat';
 
 import './styles/App.css';
+
+import { generateRandomUsername } from './utils/username';
+
+const url = window.location.origin;
+window.socket = io.connect(url);
+
+if (!window.localStorage.getItem('username')) {
+    window.localStorage.setItem('username', generateRandomUsername('Guest', 5));
+}
 
 const App = () => {
     return (

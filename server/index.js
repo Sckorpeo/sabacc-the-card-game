@@ -27,8 +27,9 @@ const io = new Server(server);
 
 io.on('connection', (socket) => {
     console.log('a user connected.');
-    socket.on('message', (msg, socket) => {
-        console.log(`Got msg from ${socket}: ${msg}`);
+    socket.on('message', (msg, username) => {
+        socket.broadcast.emit('messageRec', { username, message: msg });
+        console.log(`Got msg from ${username}: ${msg}`);
     });
     socket.on('disconnect', () => {
         console.log('user disconnected');
