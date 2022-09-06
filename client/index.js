@@ -8,6 +8,7 @@ import { store } from './store';
 import NavBar from './components/NavBar';
 import MainPage from './components/MainPage';
 import Chat from './components/Chat';
+import Lobby from './components/Lobby';
 
 import './styles/App.css';
 
@@ -25,7 +26,7 @@ const App = () => {
         <div>
             <NavBar />
             <MainPage>
-                <div>Hello World</div>
+                <Lobby />
                 <Chat />
             </MainPage>
         </div>
