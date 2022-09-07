@@ -14,14 +14,17 @@ import './styles/App.css';
 
 import { generateRandomUsername } from './utils/username';
 
-const url = window.location.origin;
-window.socket = io.connect(url);
+window.socket = io.connect();
 
 if (!window.localStorage.getItem('username')) {
     window.localStorage.setItem('username', generateRandomUsername('Guest', 5));
 }
 
 const App = () => {
+    useEffect(() => {
+        const username = window.localStorage.getItem('username');
+        window.socket.emit('user-joined', username);
+    }, []);
     return (
         <div>
             <NavBar />

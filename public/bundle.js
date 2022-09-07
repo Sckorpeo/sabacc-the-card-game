@@ -1974,15 +1974,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _styles_NavBar_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/NavBar.css */ "./client/styles/NavBar.css");
-/* harmony import */ var _Username__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Username */ "./client/components/Username.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _store_reducer_usersReducer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../store/reducer/usersReducer */ "./client/store/reducer/usersReducer.js");
+/* harmony import */ var _Username__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./Username */ "./client/components/Username.js");
+
+
 
 
 
 
 const NavBar = () => {
+  const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_2__.useDispatch)();
+  const {
+    online
+  } = (0,react_redux__WEBPACK_IMPORTED_MODULE_2__.useSelector)(state => state.users);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    window.socket.on('onlineUsers', onlineUsers => {
+      dispatch((0,_store_reducer_usersReducer__WEBPACK_IMPORTED_MODULE_3__.setUsers)(onlineUsers));
+    });
+  }, []);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("nav", {
     className: "NavBar"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Home"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Chat"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Username__WEBPACK_IMPORTED_MODULE_2__["default"], null));
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Home"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Online (", Object.keys(online).length, ")"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Username__WEBPACK_IMPORTED_MODULE_4__["default"], null));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (NavBar);
@@ -2044,16 +2057,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "store": () => (/* binding */ store)
 /* harmony export */ });
-/* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
+/* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
 /* harmony import */ var _reducer_chatReducer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./reducer/chatReducer */ "./client/store/reducer/chatReducer.js");
 /* harmony import */ var _reducer_socketReducer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./reducer/socketReducer */ "./client/store/reducer/socketReducer.js");
+/* harmony import */ var _reducer_usersReducer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./reducer/usersReducer */ "./client/store/reducer/usersReducer.js");
 
 
 
-const store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_2__.configureStore)({
+
+const store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_3__.configureStore)({
   reducer: {
     chat: _reducer_chatReducer__WEBPACK_IMPORTED_MODULE_0__["default"],
-    socket: _reducer_socketReducer__WEBPACK_IMPORTED_MODULE_1__["default"]
+    socket: _reducer_socketReducer__WEBPACK_IMPORTED_MODULE_1__["default"],
+    users: _reducer_usersReducer__WEBPACK_IMPORTED_MODULE_2__["default"]
   }
 });
 
@@ -2126,6 +2142,39 @@ const {
   setSocket
 } = socketSlice.actions;
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (socketSlice.reducer);
+
+/***/ }),
+
+/***/ "./client/store/reducer/usersReducer.js":
+/*!**********************************************!*\
+  !*** ./client/store/reducer/usersReducer.js ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "setUsers": () => (/* binding */ setUsers)
+/* harmony export */ });
+/* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
+
+const userSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_0__.createSlice)({
+  name: 'users',
+  initialState: {
+    online: {}
+  },
+  reducers: {
+    setUsers(state, action) {
+      const newState = action.payload;
+      state.online = newState;
+    }
+
+  }
+});
+const {
+  setUsers
+} = userSlice.actions;
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (userSlice.reducer);
 
 /***/ }),
 
@@ -2226,7 +2275,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "", "",{"version":3,"sources":[],"names":[],"mappings":"","sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".Lobby {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n\n.Lobby-room-list {\n    width: 100%;\n    height: 90%;\n    border: 1px grey solid;\n    overflow: scroll;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/Lobby.css"],"names":[],"mappings":"AAAA;IACI,WAAW;IACX,YAAY;IACZ,aAAa;IACb,sBAAsB;IACtB,mBAAmB;AACvB;;AAEA;IACI,WAAW;IACX,WAAW;IACX,sBAAsB;IACtB,gBAAgB;AACpB","sourcesContent":[".Lobby {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n\n.Lobby-room-list {\n    width: 100%;\n    height: 90%;\n    border: 1px grey solid;\n    overflow: scroll;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -44274,14 +44323,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const url = window.location.origin;
-window.socket = socket_io_client__WEBPACK_IMPORTED_MODULE_2__["default"].connect(url);
+window.socket = socket_io_client__WEBPACK_IMPORTED_MODULE_2__["default"].connect();
 
 if (!window.localStorage.getItem('username')) {
   window.localStorage.setItem('username', (0,_utils_username__WEBPACK_IMPORTED_MODULE_10__.generateRandomUsername)('Guest', 5));
 }
 
 const App = () => {
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const username = window.localStorage.getItem('username');
+    window.socket.emit('user-joined', username);
+  }, []);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_NavBar__WEBPACK_IMPORTED_MODULE_5__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_MainPage__WEBPACK_IMPORTED_MODULE_6__["default"], null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_Lobby__WEBPACK_IMPORTED_MODULE_8__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_Chat__WEBPACK_IMPORTED_MODULE_7__["default"], null)));
 };
 
