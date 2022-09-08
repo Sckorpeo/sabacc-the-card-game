@@ -13,6 +13,9 @@ app.use(cors());
 app.use('/public', express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json());
 
+// routes
+app.use('/api/rooms', require('./routes/rooms'));
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/index.html'));
 });
