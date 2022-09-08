@@ -11,9 +11,8 @@ router.get('/', (req, res, next) => {
 
 router.post('/', (req, res, next) => {
     try {
-        rooms.push(req.body.room);
-        req.body.socket.emit();
-        res.sendStatus(201);
+        rooms.push(req.body);
+        res.send(req.body);
     } catch (ex) {
         next(ex);
     }

@@ -11,4 +11,7 @@
     height: 90%;
     border: 1px grey solid;
     overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

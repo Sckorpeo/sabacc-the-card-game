@@ -1,7 +1,8 @@
 class Room {
-    constructor(roomId) {
+    constructor(roomId, username, socketId) {
         this.roomId = roomId; // string
         this.players = []; // Array of Players
+        this.host = { username, socketId };
     }
     addPlayer(player) {
         let i = this.getPlayerLength();
@@ -28,3 +29,5 @@ class Room {
         }
     }
 }
+
+export default Room;

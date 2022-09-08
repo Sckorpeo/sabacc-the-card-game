@@ -6,24 +6,38 @@ const fetchRooms = createAsyncThunk('rooms/fetchRooms', async () => {
     return response.data;
 });
 
+const createRoom = createAsyncThunk('rooms/createRoom', async (room) => {
+    const response = await axios.post('/api/rooms', room);
+    return response.data;
+});
+
 const roomSlice = createSlice({
     name: 'rooms',
-    initialState: [],
+    initialState: { rooms: [] },
     reducers: {
+        setRooms(state, action) {
+            state.rooms = action.payload;
+        },
         addRoom(state, action) {
-            state.push(action.payload);
+            state.rooms.push(action.payload);
         },
         removeRoom(state, action) {
-            state = state.filter((item) => item.id !== action.payload);
+            state.rooms = state.rooms.filter(
+                (item) => item.id !== action.payload
+            );
         },
     },
     extraReducers: (builder) => {
         builder.addCase(fetchRooms.fulfilled, (state, action) => {
-            state = action.payload;
+            state.rooms = action.payload;
+        });
+        builder.addCase(createRoom.fulfilled, (state, action) => {
+            state.rooms.push(action.payload);
+            window.socket.emit('newRoom');
         });
     },
 });
 
-export const { addRoom, removeRoom } = roomSlice.actions;
-export { fetchRooms };
+export const { addRoom, removeRoom, setRooms } = roomSlice.actions;
+export { fetchRooms, createRoom };
 export default roomSlice.reducer;

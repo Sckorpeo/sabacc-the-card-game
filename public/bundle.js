@@ -4384,6 +4384,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _styles_Lobby_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/Lobby.css */ "./client/styles/Lobby.css");
 /* harmony import */ var _RoomListItem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./RoomListItem */ "./client/components/RoomListItem.js");
 /* harmony import */ var _store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../store/reducer/roomsReducer */ "./client/store/reducer/roomsReducer.js");
+/* harmony import */ var _utils_roomCode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utils/roomCode */ "./client/utils/roomCode.js");
+/* harmony import */ var _models_room__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../models/room */ "./client/models/room.js");
+/* harmony import */ var _models_player__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../models/player */ "./client/models/player.js");
+
+
+
 
 
 
@@ -4394,18 +4400,36 @@ const Lobby = () => {
   const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
   const {
     rooms
-  } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state);
+  } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.rooms);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__.fetchRooms)());
   }, []);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    window.socket.on('roomsUpdate', rooms => {
+      dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__.setRooms)(rooms));
+    });
+  }, []);
+
+  const handleClick = () => {
+    const username = window.localStorage.getItem('username');
+    const socketId = window.socket.id;
+    const roomId = (0,_utils_roomCode__WEBPACK_IMPORTED_MODULE_5__.generateRoomCode)();
+    const newRoom = new _models_room__WEBPACK_IMPORTED_MODULE_6__["default"](roomId, username, socketId);
+    newRoom.addPlayer(new _models_player__WEBPACK_IMPORTED_MODULE_7__["default"](username, socketId));
+    dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__.createRoom)(newRoom));
+  };
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "Lobby"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "Lobby-room-list"
   }, rooms.map(room => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_RoomListItem__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    username: room.host,
-    players: room.players
-  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Create Room"));
+    username: room.host.username,
+    players: room.players,
+    key: room.roomId
+  }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    onClick: handleClick
+  }, "Create Room"));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Lobby);
@@ -4496,6 +4520,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _styles_RoomListItem_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/RoomListItem.css */ "./client/styles/RoomListItem.css");
+
 
 
 const RoomListItem = ({
@@ -4558,6 +4584,130 @@ const Username = () => {
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Username);
+
+/***/ }),
+
+/***/ "./client/models/player.js":
+/*!*********************************!*\
+  !*** ./client/models/player.js ***!
+  \*********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+class Player {
+  constructor(username, socketId, hand = []) {
+    this.username = username; // string
+
+    this.socketId = socketId; // string
+
+    this.hand = hand; // Array of Cards [{number: 8, suit: square, sign: positive }]
+
+    this.handTotal = this.getHandTotal();
+  }
+
+  getHandTotal() {
+    return this.hand.reduce((reducer, card) => {
+      if (card.sign === 'positive') {
+        return reducer + card.number;
+      } else {
+        return reducer - card.number;
+      }
+    }, 0);
+  }
+
+  addToHand(card) {
+    this.hand.unshift(card);
+    return 1;
+  }
+
+  removeFromHand(cardId) {
+    const removedCard = this.hand.find(card => card.id === cardId);
+
+    if (removedCard) {
+      this.hand = this.hand.filter(card => card.id !== cardId);
+      return removedCard;
+    } else {
+      return null;
+    }
+  }
+
+  trade(oldCardId, newCard) {
+    const removedCard = this.hand.find(card => card.id === oldCardId);
+
+    if (removedCard) {
+      this.hand = [...this.hand.map(card => {
+        if (card.id === oldCardId) {
+          return newCard;
+        } else {
+          return card;
+        }
+      })];
+    } else {
+      return null;
+    }
+  }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Player);
+
+/***/ }),
+
+/***/ "./client/models/room.js":
+/*!*******************************!*\
+  !*** ./client/models/room.js ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+class Room {
+  constructor(roomId, username, socketId) {
+    this.roomId = roomId; // string
+
+    this.players = []; // Array of Players
+
+    this.host = {
+      username,
+      socketId
+    };
+  }
+
+  addPlayer(player) {
+    let i = this.getPlayerLength();
+
+    if (i >= 4) {
+      return null;
+    } else {
+      this.players.push(player);
+    }
+  }
+
+  getPlayerLength() {
+    return this.players.length;
+  }
+
+  removePlayer(username) {
+    const removedPlayer = this.players.find(player => player.username === username);
+
+    if (removedPlayer) {
+      this.players = this.players.filter(player => player.username !== username);
+      return removedPlayer;
+    } else {
+      return null;
+    }
+  }
+
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Room);
 
 /***/ }),
 
@@ -4640,9 +4790,11 @@ const {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "addRoom": () => (/* binding */ addRoom),
+/* harmony export */   "createRoom": () => (/* binding */ createRoom),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "fetchRooms": () => (/* binding */ fetchRooms),
-/* harmony export */   "removeRoom": () => (/* binding */ removeRoom)
+/* harmony export */   "removeRoom": () => (/* binding */ removeRoom),
+/* harmony export */   "setRooms": () => (/* binding */ setRooms)
 /* harmony export */ });
 /* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
@@ -4653,28 +4805,43 @@ const fetchRooms = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createAsyncT
   const response = await axios__WEBPACK_IMPORTED_MODULE_0___default().get('/api/rooms');
   return response.data;
 });
+const createRoom = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createAsyncThunk)('rooms/createRoom', async room => {
+  const response = await axios__WEBPACK_IMPORTED_MODULE_0___default().post('/api/rooms', room);
+  return response.data;
+});
 const roomSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createSlice)({
   name: 'rooms',
-  initialState: [],
+  initialState: {
+    rooms: []
+  },
   reducers: {
+    setRooms(state, action) {
+      state.rooms = action.payload;
+    },
+
     addRoom(state, action) {
-      state.push(action.payload);
+      state.rooms.push(action.payload);
     },
 
     removeRoom(state, action) {
-      state = state.filter(item => item.id !== action.payload);
+      state.rooms = state.rooms.filter(item => item.id !== action.payload);
     }
 
   },
   extraReducers: builder => {
     builder.addCase(fetchRooms.fulfilled, (state, action) => {
-      state = action.payload;
+      state.rooms = action.payload;
+    });
+    builder.addCase(createRoom.fulfilled, (state, action) => {
+      state.rooms.push(action.payload);
+      window.socket.emit('newRoom');
     });
   }
 });
 const {
   addRoom,
-  removeRoom
+  removeRoom,
+  setRooms
 } = roomSlice.actions;
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (roomSlice.reducer);
@@ -4747,6 +4914,40 @@ const {
   setUsers
 } = userSlice.actions;
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (userSlice.reducer);
+
+/***/ }),
+
+/***/ "./client/utils/roomCode.js":
+/*!**********************************!*\
+  !*** ./client/utils/roomCode.js ***!
+  \**********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "generateRoomCode": () => (/* binding */ generateRoomCode)
+/* harmony export */ });
+const generateRoomCode = (n = 5) => {
+  let arr = [];
+  let res = '';
+
+  while (arr.length < n) {
+    let num = Math.floor(Math.random() * 91);
+
+    if (num > 47) {
+      if (num < 58 || num > 64) {
+        let letter = String.fromCharCode(num);
+        arr.push(letter);
+        res = res + letter;
+      }
+    }
+  }
+
+  return res;
+};
+
+
 
 /***/ }),
 
@@ -4851,7 +5052,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".Lobby {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n\n.Lobby-room-list {\n    width: 100%;\n    height: 90%;\n    border: 1px grey solid;\n    overflow: scroll;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/Lobby.css"],"names":[],"mappings":"AAAA;IACI,WAAW;IACX,YAAY;IACZ,aAAa;IACb,sBAAsB;IACtB,mBAAmB;AACvB;;AAEA;IACI,WAAW;IACX,WAAW;IACX,sBAAsB;IACtB,gBAAgB;AACpB","sourcesContent":[".Lobby {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n\n.Lobby-room-list {\n    width: 100%;\n    height: 90%;\n    border: 1px grey solid;\n    overflow: scroll;\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".Lobby {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n\n.Lobby-room-list {\n    width: 100%;\n    height: 90%;\n    border: 1px grey solid;\n    overflow: scroll;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/Lobby.css"],"names":[],"mappings":"AAAA;IACI,WAAW;IACX,YAAY;IACZ,aAAa;IACb,sBAAsB;IACtB,mBAAmB;AACvB;;AAEA;IACI,WAAW;IACX,WAAW;IACX,sBAAsB;IACtB,gBAAgB;IAChB,aAAa;IACb,sBAAsB;IACtB,mBAAmB;AACvB","sourcesContent":[".Lobby {\n    width: 100%;\n    height: 100%;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n\n.Lobby-room-list {\n    width: 100%;\n    height: 90%;\n    border: 1px grey solid;\n    overflow: scroll;\n    display: flex;\n    flex-direction: column;\n    align-items: center;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -4906,6 +5107,33 @@ __webpack_require__.r(__webpack_exports__);
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
 ___CSS_LOADER_EXPORT___.push([module.id, ".NavBar {\n    display: flex;\n    height: 10vh;\n    justify-content: space-around;\n    align-items: center;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/NavBar.css"],"names":[],"mappings":"AAAA;IACI,aAAa;IACb,YAAY;IACZ,6BAA6B;IAC7B,mBAAmB;AACvB","sourcesContent":[".NavBar {\n    display: flex;\n    height: 10vh;\n    justify-content: space-around;\n    align-items: center;\n}\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./client/styles/RoomListItem.css":
+/*!************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./client/styles/RoomListItem.css ***!
+  \************************************************************************************************************************/
+/***/ ((module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/sourceMaps.js */ "./node_modules/css-loader/dist/runtime/sourceMaps.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, ".RoomListItem {\n    display: flex;\n    height: 14%;\n    width: 90%;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 5px;\n    border: 1px solid green;\n    margin-top: 1rem;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/RoomListItem.css"],"names":[],"mappings":"AAAA;IACI,aAAa;IACb,WAAW;IACX,UAAU;IACV,6BAA6B;IAC7B,mBAAmB;IACnB,kBAAkB;IAClB,uBAAuB;IACvB,gBAAgB;AACpB","sourcesContent":[".RoomListItem {\n    display: flex;\n    height: 14%;\n    width: 90%;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 5px;\n    border: 1px solid green;\n    margin-top: 1rem;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -41979,6 +42207,61 @@ var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js
 
 
        /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_NavBar_css__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_NavBar_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_NavBar_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
+
+
+/***/ }),
+
+/***/ "./client/styles/RoomListItem.css":
+/*!****************************************!*\
+  !*** ./client/styles/RoomListItem.css ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js */ "./node_modules/style-loader/dist/runtime/injectStylesIntoStyleTag.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/styleDomAPI.js */ "./node_modules/style-loader/dist/runtime/styleDomAPI.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/insertBySelector.js */ "./node_modules/style-loader/dist/runtime/insertBySelector.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js */ "./node_modules/style-loader/dist/runtime/setAttributesWithoutAttributes.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/insertStyleElement.js */ "./node_modules/style-loader/dist/runtime/insertStyleElement.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! !../../node_modules/style-loader/dist/runtime/styleTagTransform.js */ "./node_modules/style-loader/dist/runtime/styleTagTransform.js");
+/* harmony import */ var _node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5__);
+/* harmony import */ var _node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_RoomListItem_css__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! !!../../node_modules/css-loader/dist/cjs.js!../../node_modules/postcss-loader/dist/cjs.js!./RoomListItem.css */ "./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./client/styles/RoomListItem.css");
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+var options = {};
+
+options.styleTagTransform = (_node_modules_style_loader_dist_runtime_styleTagTransform_js__WEBPACK_IMPORTED_MODULE_5___default());
+options.setAttributes = (_node_modules_style_loader_dist_runtime_setAttributesWithoutAttributes_js__WEBPACK_IMPORTED_MODULE_3___default());
+
+      options.insert = _node_modules_style_loader_dist_runtime_insertBySelector_js__WEBPACK_IMPORTED_MODULE_2___default().bind(null, "head");
+    
+options.domAPI = (_node_modules_style_loader_dist_runtime_styleDomAPI_js__WEBPACK_IMPORTED_MODULE_1___default());
+options.insertStyleElement = (_node_modules_style_loader_dist_runtime_insertStyleElement_js__WEBPACK_IMPORTED_MODULE_4___default());
+
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_RoomListItem_css__WEBPACK_IMPORTED_MODULE_6__["default"], options);
+
+
+
+
+       /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_RoomListItem_css__WEBPACK_IMPORTED_MODULE_6__["default"] && _node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_RoomListItem_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals ? _node_modules_css_loader_dist_cjs_js_node_modules_postcss_loader_dist_cjs_js_RoomListItem_css__WEBPACK_IMPORTED_MODULE_6__["default"].locals : undefined);
 
 
 /***/ }),

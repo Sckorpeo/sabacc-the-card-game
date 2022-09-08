@@ -6,7 +6,7 @@ const app = express();
 const { Server } = require('socket.io');
 
 const onlineUsers = require('./logic/onlineUsers');
-const { handleUserJoin } = require('./logic/socket');
+const { handleUserJoin, handleRoomCreate } = require('./logic/socket');
 
 // static middleware
 app.use(cors());
@@ -40,6 +40,9 @@ io.on('connection', (socket) => {
     socket.on('message', (msg, username) => {
         socket.broadcast.emit('messageRec', { username, message: msg });
         console.log(`Got msg from ${username}: ${msg}`);
+    });
+    socket.on('newRoom', () => {
+        handleRoomCreate(socket);
     });
     socket.on('disconnect', () => {
         delete onlineUsers[socket.id];
