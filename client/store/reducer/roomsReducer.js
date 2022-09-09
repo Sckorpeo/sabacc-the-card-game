@@ -26,6 +26,11 @@ const roomSlice = createSlice({
                 (item) => item.id !== action.payload
             );
         },
+        updateRoom(state, action) {
+            state.rooms = state.rooms.map((room) =>
+                room.roomId === action.payload.roomId ? action.payload : room
+            );
+        },
     },
     extraReducers: (builder) => {
         builder.addCase(fetchRooms.fulfilled, (state, action) => {
@@ -38,6 +43,6 @@ const roomSlice = createSlice({
     },
 });
 
-export const { addRoom, removeRoom, setRooms } = roomSlice.actions;
+export const { addRoom, removeRoom, setRooms, updateRoom } = roomSlice.actions;
 export { fetchRooms, createRoom };
 export default roomSlice.reducer;

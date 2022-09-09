@@ -3,6 +3,12 @@ class Room {
         this.roomId = roomId; // string
         this.players = []; // Array of Players
         this.host = { username, socketId };
+        this.round = 0;
+        this.curPlayer = '';
+        this.gameOver = false;
+        this.gameStarted = false;
+        this.deck = [];
+        this.discard = [];
     }
     addPlayer(player) {
         let i = this.getPlayerLength();

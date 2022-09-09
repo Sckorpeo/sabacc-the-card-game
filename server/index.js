@@ -6,7 +6,9 @@ const app = express();
 const { Server } = require('socket.io');
 
 const onlineUsers = require('./logic/onlineUsers');
-const { handleUserJoin, handleRoomCreate } = require('./logic/socket');
+const { handleUserJoin } = require('./logic/socket');
+
+let rooms = require('./logic/rooms');
 
 // static middleware
 app.use(cors());
@@ -41,8 +43,17 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('messageRec', { username, message: msg });
         console.log(`Got msg from ${username}: ${msg}`);
     });
-    socket.on('newRoom', () => {
-        handleRoomCreate(socket);
+    socket.on('roomCreated', (room) => {
+        rooms.push(room);
+        io.emit('roomsUpdate', rooms);
+    });
+    socket.on('roomJoin', (roomId, player) => {
+        const roomToUpdate = rooms.find((room) => room.roomId === roomId);
+        roomToUpdate.players.push(player);
+        io.emit('roomsUpdate', rooms);
+    });
+    socket.on('gameUpdate', (game) => {
+        io.emit('gameUpdate', game);
     });
     socket.on('disconnect', () => {
         delete onlineUsers[socket.id];

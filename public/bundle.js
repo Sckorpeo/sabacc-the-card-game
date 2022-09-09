@@ -4327,6 +4327,11 @@ const Card = ({
       className: "Card",
       src: `public/assets/logo.png`
     });
+  } else if (number === '0') {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
+      className: "Card",
+      src: 'public/assets/sabacc_sylop_thumb.png'
+    });
   } else {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
       className: "Card",
@@ -4352,8 +4357,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _styles_CardHolder_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/CardHolder.css */ "./client/styles/CardHolder.css");
-/* harmony import */ var _Card__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Card */ "./client/components/Card.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var _styles_CardHolder_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/CardHolder.css */ "./client/styles/CardHolder.css");
+/* harmony import */ var _Card__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Card */ "./client/components/Card.js");
+
+
 
 
 
@@ -4361,12 +4370,26 @@ __webpack_require__.r(__webpack_exports__);
 const CardHolder = ({
   hand = []
 }) => {
+  const {
+    roomId
+  } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_4__.useParams)();
+  const {
+    rooms
+  } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.rooms);
+  const game = rooms.find(item => item.roomId === roomId);
+  const playerHand = game.players.find(player => player.socketId === window.socket.id)?.hand;
+
+  if (!game) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Loading..");
+  }
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "CardHolder"
-  }, hand.map(card => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, playerHand?.map(card => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
     sign: card.sign,
     suit: card.suit,
-    number: card.number
+    number: card.imgNum,
+    key: card.id
   })));
 };
 
@@ -4455,24 +4478,37 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _styles_DeckHolder_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/DeckHolder.css */ "./client/styles/DeckHolder.css");
-/* harmony import */ var _Card__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Card */ "./client/components/Card.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var _styles_DeckHolder_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/DeckHolder.css */ "./client/styles/DeckHolder.css");
+/* harmony import */ var _Card__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Card */ "./client/components/Card.js");
 
 
 
 
-const DeckHolder = ({
-  deck = [],
-  discard = []
-}) => {
+
+
+const DeckHolder = () => {
+  const {
+    roomId
+  } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_4__.useParams)();
+  const {
+    rooms
+  } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.rooms);
+  const game = rooms.find(item => item.roomId === roomId);
+
+  if (!game) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Loading..");
+  }
+
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "DeckHolder"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
     cardBack: true
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    sign: discard[0]?.sign,
-    suit: discard[0]?.suit,
-    number: discard[0]?.number
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    sign: game.discard[0]?.sign,
+    suit: game.discard[0]?.suit,
+    number: game.discard[0]?.imgNum
   }));
 };
 
@@ -4494,22 +4530,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
 /* harmony import */ var _styles_Lobby_css__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../styles/Lobby.css */ "./client/styles/Lobby.css");
 /* harmony import */ var _RoomListItem__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./RoomListItem */ "./client/components/RoomListItem.js");
 /* harmony import */ var _store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../store/reducer/roomsReducer */ "./client/store/reducer/roomsReducer.js");
 /* harmony import */ var _utils_roomCode__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../utils/roomCode */ "./client/utils/roomCode.js");
 /* harmony import */ var _models_room__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../models/room */ "./client/models/room.js");
-/* harmony import */ var _models_player__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../models/player */ "./client/models/player.js");
+// Packages
 
 
+ // Components and Styles
 
 
+ //State
 
+ // Util Functions
 
+ // Classes
 
 
 
 const Lobby = () => {
+  let navigate = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_7__.useNavigate)();
   const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
   const {
     rooms
@@ -4517,19 +4559,14 @@ const Lobby = () => {
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__.fetchRooms)());
   }, []);
-  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
-    window.socket.on('roomsUpdate', rooms => {
-      dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__.setRooms)(rooms));
-    });
-  }, []);
 
   const handleClick = () => {
     const username = window.localStorage.getItem('username');
     const socketId = window.socket.id;
     const roomId = (0,_utils_roomCode__WEBPACK_IMPORTED_MODULE_5__.generateRoomCode)();
     const newRoom = new _models_room__WEBPACK_IMPORTED_MODULE_6__["default"](roomId, username, socketId);
-    newRoom.addPlayer(new _models_player__WEBPACK_IMPORTED_MODULE_7__["default"](username, socketId));
-    dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_4__.createRoom)(newRoom));
+    window.socket.emit('roomCreated', newRoom);
+    navigate(`/game/${newRoom.roomId}`);
   };
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
@@ -4721,80 +4758,6 @@ const Username = () => {
 
 /***/ }),
 
-/***/ "./client/models/player.js":
-/*!*********************************!*\
-  !*** ./client/models/player.js ***!
-  \*********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-class Player {
-  constructor(username, socketId, hand = []) {
-    this.username = username; // string
-
-    this.socketId = socketId; // string
-
-    this.hand = hand; // Array of Cards [{number: 8, suit: square, sign: positive }]
-
-    this.handTotal = this.getHandTotal();
-  }
-
-  getHandTotal() {
-    return this.hand.reduce((reducer, card) => {
-      if (card.sign === 'pos') {
-        return reducer + card.number;
-      } else {
-        return reducer - card.number;
-      }
-    }, 0);
-  }
-
-  addToHand(card) {
-    this.hand.unshift(card);
-    this.handTotal = this.getHandTotal();
-    return 1;
-  }
-
-  removeFromHand(cardId) {
-    const removedCard = this.hand.find(card => card.id === cardId);
-
-    if (removedCard) {
-      this.hand = this.hand.filter(card => card.id !== cardId);
-      this.handTotal = this.getHandTotal();
-      return removedCard;
-    } else {
-      return null;
-    }
-  }
-
-  trade(oldCardId, newCard) {
-    const removedCard = this.hand.find(card => card.id === oldCardId);
-
-    if (removedCard) {
-      this.hand = [...this.hand.map(card => {
-        if (card.id === oldCardId) {
-          return newCard;
-        } else {
-          return card;
-        }
-      })];
-      this.handTotal = this.getHandTotal();
-      return 1;
-    } else {
-      return null;
-    }
-  }
-
-}
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Player);
-
-/***/ }),
-
 /***/ "./client/models/room.js":
 /*!*******************************!*\
   !*** ./client/models/room.js ***!
@@ -4816,6 +4779,12 @@ class Room {
       username,
       socketId
     };
+    this.round = 0;
+    this.curPlayer = '';
+    this.gameOver = false;
+    this.gameStarted = false;
+    this.deck = [];
+    this.discard = [];
   }
 
   addPlayer(player) {
@@ -4862,40 +4831,67 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
-/* harmony import */ var _styles_GamePage_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/GamePage.css */ "./client/styles/GamePage.css");
-/* harmony import */ var _components_PlayerCard__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/PlayerCard */ "./client/components/PlayerCard.js");
-/* harmony import */ var _components_CardHolder__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/CardHolder */ "./client/components/CardHolder.js");
-/* harmony import */ var _components_DeckHolder__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/DeckHolder */ "./client/components/DeckHolder.js");
+/* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+/* harmony import */ var _store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/reducer/roomsReducer */ "./client/store/reducer/roomsReducer.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var _styles_GamePage_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../styles/GamePage.css */ "./client/styles/GamePage.css");
+/* harmony import */ var _components_PlayerCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/PlayerCard */ "./client/components/PlayerCard.js");
+/* harmony import */ var _components_CardHolder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/CardHolder */ "./client/components/CardHolder.js");
+/* harmony import */ var _components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components/DeckHolder */ "./client/components/DeckHolder.js");
+/* harmony import */ var _utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../utils/gameFunctions */ "./client/utils/gameFunctions.js");
 
 
 
 
 
 
-const players = [];
 
-const GamePage = ({
-  game = {}
-}) => {
+
+
+
+const GamePage = () => {
+  const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
   const {
     roomId
-  } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_5__.useParams)();
+  } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_8__.useParams)();
+  const {
+    rooms
+  } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.rooms);
+  const game = rooms.find(item => item.roomId === roomId) || {};
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    const player = {
+      hand: [],
+      handTotal: 0,
+      socketId: window.socket.id,
+      username: window.localStorage.getItem('username')
+    };
+    window.socket.emit('roomJoin', roomId, player);
+    window.socket.on('gameUpdate', game => {
+      dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_2__.updateRoom)(game));
+    });
+  }, []);
 
-  const handleClick = ev => {
-    console.log(roomId);
+  const handleStart = () => {
+    const gameCopy = JSON.parse(JSON.stringify(game));
+    window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__.initGame)(gameCopy));
   };
 
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
-    className: "GamePage",
-    onClick: handleClick
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_PlayerCard__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    username: window.localStorage.getItem('username')
-  }), players.map(player => player.socketId !== window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_PlayerCard__WEBPACK_IMPORTED_MODULE_2__["default"], {
-    username: player.username
-  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_4__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_3__["default"], null)), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
-    disabled: players.length < 2
-  }, "Start Game"), game.curPlayer === window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Skip Turn"));
+  if (!Object.keys(game).length) {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Loading...");
+  } else {
+    return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+      className: "GamePage"
+    }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_PlayerCard__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      username: window.localStorage.getItem('username'),
+      key: window.localStorage.getItem('username')
+    }), game.players.map(player => player.socketId !== window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_PlayerCard__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      username: player.username,
+      key: player.username
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_5__["default"], null)), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      disabled: game.players.length < 2,
+      onClick: handleStart
+    }, "Start Game"), game.curPlayer === window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Skip Turn"));
+  }
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (GamePage);
@@ -4973,22 +4969,25 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "store": () => (/* binding */ store)
 /* harmony export */ });
-/* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
+/* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
 /* harmony import */ var _reducer_chatReducer__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./reducer/chatReducer */ "./client/store/reducer/chatReducer.js");
 /* harmony import */ var _reducer_socketReducer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./reducer/socketReducer */ "./client/store/reducer/socketReducer.js");
 /* harmony import */ var _reducer_usersReducer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./reducer/usersReducer */ "./client/store/reducer/usersReducer.js");
 /* harmony import */ var _reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./reducer/roomsReducer */ "./client/store/reducer/roomsReducer.js");
+/* harmony import */ var _reducer_gameReducer__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./reducer/gameReducer */ "./client/store/reducer/gameReducer.js");
 
 
 
 
 
-const store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_4__.configureStore)({
+
+const store = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_5__.configureStore)({
   reducer: {
     chat: _reducer_chatReducer__WEBPACK_IMPORTED_MODULE_0__["default"],
     socket: _reducer_socketReducer__WEBPACK_IMPORTED_MODULE_1__["default"],
     users: _reducer_usersReducer__WEBPACK_IMPORTED_MODULE_2__["default"],
-    rooms: _reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_3__["default"]
+    rooms: _reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_3__["default"],
+    game: _reducer_gameReducer__WEBPACK_IMPORTED_MODULE_4__["default"]
   }
 });
 
@@ -5031,6 +5030,39 @@ const {
 
 /***/ }),
 
+/***/ "./client/store/reducer/gameReducer.js":
+/*!*********************************************!*\
+  !*** ./client/store/reducer/gameReducer.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "setGame": () => (/* binding */ setGame)
+/* harmony export */ });
+/* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
+
+const gameSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_0__.createSlice)({
+  name: 'game',
+  initialState: {
+    game: {}
+  },
+  reducers: {
+    setGame(state, action) {
+      state.game = action.payload;
+    }
+
+  }
+});
+const {
+  setGame
+} = gameSlice.actions;
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (gameSlice.reducer);
+
+/***/ }),
+
 /***/ "./client/store/reducer/roomsReducer.js":
 /*!**********************************************!*\
   !*** ./client/store/reducer/roomsReducer.js ***!
@@ -5045,7 +5077,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
 /* harmony export */   "fetchRooms": () => (/* binding */ fetchRooms),
 /* harmony export */   "removeRoom": () => (/* binding */ removeRoom),
-/* harmony export */   "setRooms": () => (/* binding */ setRooms)
+/* harmony export */   "setRooms": () => (/* binding */ setRooms),
+/* harmony export */   "updateRoom": () => (/* binding */ updateRoom)
 /* harmony export */ });
 /* harmony import */ var _reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @reduxjs/toolkit */ "./node_modules/@reduxjs/toolkit/dist/redux-toolkit.esm.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
@@ -5076,6 +5109,10 @@ const roomSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createSlice)(
 
     removeRoom(state, action) {
       state.rooms = state.rooms.filter(item => item.id !== action.payload);
+    },
+
+    updateRoom(state, action) {
+      state.rooms = state.rooms.map(room => room.roomId === action.payload.roomId ? action.payload : room);
     }
 
   },
@@ -5092,7 +5129,8 @@ const roomSlice = (0,_reduxjs_toolkit__WEBPACK_IMPORTED_MODULE_1__.createSlice)(
 const {
   addRoom,
   removeRoom,
-  setRooms
+  setRooms,
+  updateRoom
 } = roomSlice.actions;
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (roomSlice.reducer);
@@ -5165,6 +5203,126 @@ const {
   setUsers
 } = userSlice.actions;
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (userSlice.reducer);
+
+/***/ }),
+
+/***/ "./client/utils/cards.js":
+/*!*******************************!*\
+  !*** ./client/utils/cards.js ***!
+  \*******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "createDeck": () => (/* binding */ createDeck),
+/* harmony export */   "shuffle": () => (/* binding */ shuffle)
+/* harmony export */ });
+const createDeck = () => {
+  const res = [{
+    number: 0,
+    id: 'sylop01',
+    imgNum: '0'
+  }, {
+    number: 0,
+    id: 'sylop02',
+    imgNum: '0'
+  }];
+  ['cir', 'sqr', 'tri'].forEach(suit => {
+    for (let i = 1; i < 11; i++) {
+      let imgNum = i < 10 ? `0${i}` : '10';
+      res.push({
+        number: i,
+        suit: suit,
+        sign: 'neg',
+        imgNum: imgNum,
+        id: `${imgNum}${suit}neg`
+      });
+      res.push({
+        number: i,
+        suit: suit,
+        sign: 'pos',
+        imgNum: imgNum,
+        id: `${imgNum}${suit}pos`
+      });
+    }
+  });
+  return res;
+};
+
+const shuffle = deck => {
+  const randomNumber = n => {
+    let num = Math.floor(Math.random() * n);
+    return num;
+  };
+
+  let copyDeck = [...deck];
+  let shuffledDeck = [];
+
+  while (shuffledDeck.length < 62) {
+    let ranNum = randomNumber(copyDeck.length);
+    shuffledDeck.push(copyDeck[ranNum]);
+    copyDeck.splice(ranNum, 1);
+  }
+
+  return shuffledDeck;
+};
+
+
+
+/***/ }),
+
+/***/ "./client/utils/gameFunctions.js":
+/*!***************************************!*\
+  !*** ./client/utils/gameFunctions.js ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addCardToHand": () => (/* binding */ addCardToHand),
+/* harmony export */   "discard": () => (/* binding */ discard),
+/* harmony export */   "draw": () => (/* binding */ draw),
+/* harmony export */   "initGame": () => (/* binding */ initGame)
+/* harmony export */ });
+/* harmony import */ var _cards__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./cards */ "./client/utils/cards.js");
+
+
+const draw = game => {
+  return game.deck.shift();
+};
+
+const discard = (game, card) => {
+  return game.discard.unshift(card);
+};
+
+const addCardToHand = (game = {}, playerId, card) => {
+  const curPlayer = game.players?.find(player => player.socketId === playerId);
+  curPlayer?.hand?.push(card);
+  return game;
+};
+
+const initGame = (game = {}) => {
+  // create sabacc deck and shuffle
+  game.deck = (0,_cards__WEBPACK_IMPORTED_MODULE_0__.shuffle)((0,_cards__WEBPACK_IMPORTED_MODULE_0__.createDeck)()); // flip first card
+
+  discard(game, draw(game)); // deal 5 cards to each player
+
+  game.players.forEach(player => {
+    while (player.hand.length < 6) {
+      let card = draw(game);
+      addCardToHand(game, player.socketId, card);
+    }
+  }); // set current player
+
+  game.curPlayer = game.players[0].socketId; // set game started
+
+  game.gameStarted = true;
+  return game;
+};
+
+
 
 /***/ }),
 
@@ -50146,17 +50304,19 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/index.js");
 /* harmony import */ var react_dom_client__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
 /* harmony import */ var socket_io_client__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! socket.io-client */ "./node_modules/socket.io-client/build/esm/index.js");
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./store */ "./client/store/index.js");
-/* harmony import */ var _pages_HomePage__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./pages/HomePage */ "./client/pages/HomePage.js");
-/* harmony import */ var _pages_GamePage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pages/GamePage */ "./client/pages/GamePage.js");
-/* harmony import */ var _styles_App_css__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./styles/App.css */ "./client/styles/App.css");
-/* harmony import */ var _utils_username__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./utils/username */ "./client/utils/username.js");
+/* harmony import */ var _store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./store/reducer/roomsReducer */ "./client/store/reducer/roomsReducer.js");
+/* harmony import */ var _pages_HomePage__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./pages/HomePage */ "./client/pages/HomePage.js");
+/* harmony import */ var _pages_GamePage__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./pages/GamePage */ "./client/pages/GamePage.js");
+/* harmony import */ var _styles_App_css__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./styles/App.css */ "./client/styles/App.css");
+/* harmony import */ var _utils_username__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./utils/username */ "./client/utils/username.js");
 // External Package Imports
+
 
 
 
@@ -50170,27 +50330,36 @@ __webpack_require__.r(__webpack_exports__);
 window.socket = socket_io_client__WEBPACK_IMPORTED_MODULE_2__["default"].connect();
 
 if (!window.localStorage.getItem('username')) {
-  window.localStorage.setItem('username', (0,_utils_username__WEBPACK_IMPORTED_MODULE_8__.generateRandomUsername)('Guest', 5));
+  window.localStorage.setItem('username', (0,_utils_username__WEBPACK_IMPORTED_MODULE_9__.generateRandomUsername)('Guest', 5));
 }
 
 const App = () => {
+  const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_3__.useDispatch)();
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     const username = window.localStorage.getItem('username');
     window.socket.emit('user-joined', username);
   }, []);
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    window.socket.on('roomsUpdate', rooms => {
+      console.log('Received', {
+        rooms
+      });
+      dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_5__.setRooms)(rooms));
+    });
+  }, []);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.Route, {
     path: "/",
-    element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pages_HomePage__WEBPACK_IMPORTED_MODULE_5__["default"], null)
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_9__.Route, {
+    element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pages_HomePage__WEBPACK_IMPORTED_MODULE_6__["default"], null)
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.Route, {
     path: "/game/:roomId",
-    element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pages_GamePage__WEBPACK_IMPORTED_MODULE_6__["default"], null)
+    element: /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_pages_GamePage__WEBPACK_IMPORTED_MODULE_7__["default"], null)
   })));
 };
 
 const root = (0,react_dom_client__WEBPACK_IMPORTED_MODULE_1__.createRoot)(document.querySelector('#root'));
 root.render( /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_redux__WEBPACK_IMPORTED_MODULE_3__.Provider, {
   store: _store__WEBPACK_IMPORTED_MODULE_4__.store
-}, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.HashRouter, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(App, null))));
+}, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_11__.HashRouter, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(App, null))));
 })();
 
 /******/ })()
