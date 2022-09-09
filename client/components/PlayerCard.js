@@ -4,16 +4,17 @@ import '../styles/PlayerCard.css';
 const PlayerCard = ({
     username,
     turn = false,
-    player = false,
+    gameStarted = false,
     handTotal = 0,
+    youAreThePlayer = false,
 }) => {
     return (
         <div className="PlayerCard">
             <div className="PlayerCard-content">
                 <div className="PlayerCard-username">{username}</div>
-                {turn && <i class="far fa-compass fa-spin fa-3x"></i>}
+                {turn && <i className="far fa-compass fa-spin fa-3x"></i>}
             </div>
-            {player && <p>Hand Total: {handTotal}</p>}
+            {gameStarted && youAreThePlayer && <p>Hand Total: {handTotal}</p>}
         </div>
     );
 };

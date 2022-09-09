@@ -4573,7 +4573,7 @@ const Lobby = () => {
     className: "Lobby"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "Lobby-room-list"
-  }, rooms.map(room => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_RoomListItem__WEBPACK_IMPORTED_MODULE_3__["default"], {
+  }, rooms.map(room => !room.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_RoomListItem__WEBPACK_IMPORTED_MODULE_3__["default"], {
     username: room.host.username,
     players: room.players,
     key: room.roomId,
@@ -4649,8 +4649,9 @@ __webpack_require__.r(__webpack_exports__);
 const PlayerCard = ({
   username,
   turn = false,
-  player = false,
-  handTotal = 0
+  gameStarted = false,
+  handTotal = 0,
+  youAreThePlayer = false
 }) => {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "PlayerCard"
@@ -4659,8 +4660,8 @@ const PlayerCard = ({
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "PlayerCard-username"
   }, username), turn && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("i", {
-    class: "far fa-compass fa-spin fa-3x"
-  })), player && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Hand Total: ", handTotal));
+    className: "far fa-compass fa-spin fa-3x"
+  })), gameStarted && youAreThePlayer && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Hand Total: ", handTotal));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerCard);
@@ -4882,11 +4883,17 @@ const GamePage = () => {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
       className: "GamePage"
     }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_PlayerCard__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      turn: window.socket.id === game.curPlayer,
       username: window.localStorage.getItem('username'),
-      key: window.localStorage.getItem('username')
+      key: window.localStorage.getItem('username'),
+      gameStarted: game.gameStarted,
+      handTotal: game.players.find(player => player.socketId === window.socket.id)?.handTotal,
+      youAreThePlayer: true
     }), game.players.map(player => player.socketId !== window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_PlayerCard__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      turn: game.curPlayer === player.socketId,
       username: player.username,
-      key: player.username
+      key: player.username,
+      gameStarted: game.gameStarted
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_5__["default"], null)), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       disabled: game.players.length < 2,
       onClick: handleStart
@@ -5303,6 +5310,18 @@ const addCardToHand = (game = {}, playerId, card) => {
   return game;
 };
 
+const getHandTotal = hand => {
+  return hand.reduce((reducer, card) => {
+    if (card.sign === 'pos') {
+      return reducer + card.number;
+    } else if (card.sign === 'neg') {
+      return reducer - card.number;
+    } else {
+      return reducer;
+    }
+  }, 0);
+};
+
 const initGame = (game = {}) => {
   // create sabacc deck and shuffle
   game.deck = (0,_cards__WEBPACK_IMPORTED_MODULE_0__.shuffle)((0,_cards__WEBPACK_IMPORTED_MODULE_0__.createDeck)()); // flip first card
@@ -5314,6 +5333,8 @@ const initGame = (game = {}) => {
       let card = draw(game);
       addCardToHand(game, player.socketId, card);
     }
+
+    player.handTotal = getHandTotal(player.hand);
   }); // set current player
 
   game.curPlayer = game.players[0].socketId; // set game started
@@ -50345,6 +50366,9 @@ const App = () => {
         rooms
       });
       dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_5__.setRooms)(rooms));
+    });
+    window.socket.on('gameUpdate', game => {
+      dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_5__.updateRoom)(game));
     });
   }, []);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.Routes, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(react_router_dom__WEBPACK_IMPORTED_MODULE_10__.Route, {

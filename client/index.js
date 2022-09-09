@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { Provider, useDispatch } from 'react-redux';
 import { store } from './store';
 
-import { setRooms } from './store/reducer/roomsReducer';
+import { setRooms, updateRoom } from './store/reducer/roomsReducer';
 
 import HomePage from './pages/HomePage';
 import GamePage from './pages/GamePage';
@@ -31,6 +31,9 @@ const App = () => {
         window.socket.on('roomsUpdate', (rooms) => {
             console.log('Received', { rooms });
             dispatch(setRooms(rooms));
+        });
+        window.socket.on('gameUpdate', (game) => {
+            dispatch(updateRoom(game));
         });
     }, []);
     return (

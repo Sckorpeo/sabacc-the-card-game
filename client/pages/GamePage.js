@@ -41,15 +41,25 @@ const GamePage = () => {
         return (
             <div className="GamePage">
                 <PlayerCard
+                    turn={window.socket.id === game.curPlayer}
                     username={window.localStorage.getItem('username')}
                     key={window.localStorage.getItem('username')}
+                    gameStarted={game.gameStarted}
+                    handTotal={
+                        game.players.find(
+                            (player) => player.socketId === window.socket.id
+                        )?.handTotal
+                    }
+                    youAreThePlayer={true}
                 />
                 {game.players.map(
                     (player) =>
                         player.socketId !== window.socket.id && (
                             <PlayerCard
+                                turn={game.curPlayer === player.socketId}
                                 username={player.username}
                                 key={player.username}
+                                gameStarted={game.gameStarted}
                             />
                         )
                 )}

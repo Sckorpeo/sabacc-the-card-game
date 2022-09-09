@@ -16,6 +16,18 @@ const addCardToHand = (game = {}, playerId, card) => {
     return game;
 };
 
+const getHandTotal = (hand) => {
+    return hand.reduce((reducer, card) => {
+        if (card.sign === 'pos') {
+            return reducer + card.number;
+        } else if (card.sign === 'neg') {
+            return reducer - card.number;
+        } else {
+            return reducer;
+        }
+    }, 0);
+};
+
 const initGame = (game = {}) => {
     // create sabacc deck and shuffle
     game.deck = shuffle(createDeck());
@@ -29,6 +41,7 @@ const initGame = (game = {}) => {
             let card = draw(game);
             addCardToHand(game, player.socketId, card);
         }
+        player.handTotal = getHandTotal(player.hand);
     });
 
     // set current player

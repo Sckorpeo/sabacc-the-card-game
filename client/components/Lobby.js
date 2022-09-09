@@ -39,14 +39,17 @@ const Lobby = () => {
     return (
         <div className="Lobby">
             <div className="Lobby-room-list">
-                {rooms.map((room) => (
-                    <RoomListItem
-                        username={room.host.username}
-                        players={room.players}
-                        key={room.roomId}
-                        room={room}
-                    />
-                ))}
+                {rooms.map(
+                    (room) =>
+                        !room.gameStarted && (
+                            <RoomListItem
+                                username={room.host.username}
+                                players={room.players}
+                                key={room.roomId}
+                                room={room}
+                            />
+                        )
+                )}
             </div>
             <button onClick={handleClick}>Create Room</button>
         </div>
