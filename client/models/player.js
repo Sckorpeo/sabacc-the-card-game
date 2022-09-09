@@ -7,7 +7,7 @@ class Player {
     }
     getHandTotal() {
         return this.hand.reduce((reducer, card) => {
-            if (card.sign === 'positive') {
+            if (card.sign === 'pos') {
                 return reducer + card.number;
             } else {
                 return reducer - card.number;
@@ -16,12 +16,14 @@ class Player {
     }
     addToHand(card) {
         this.hand.unshift(card);
+        this.handTotal = this.getHandTotal();
         return 1;
     }
     removeFromHand(cardId) {
         const removedCard = this.hand.find((card) => card.id === cardId);
         if (removedCard) {
             this.hand = this.hand.filter((card) => card.id !== cardId);
+            this.handTotal = this.getHandTotal();
             return removedCard;
         } else {
             return null;
@@ -39,6 +41,8 @@ class Player {
                     }
                 }),
             ];
+            this.handTotal = this.getHandTotal();
+            return 1;
         } else {
             return null;
         }

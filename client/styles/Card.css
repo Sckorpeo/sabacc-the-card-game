@@ -1,0 +1,10 @@
+.Card {
+    height: auto;
+    width: 5rem;
+    transition: linear 0.3s;
+}
+
+.Card:hover {
+    cursor: pointer;
+    transform: scale(1.3);
+}

@@ -1,0 +1,12 @@
+.CardHolder {
+    width: 30rem;
+    height: 10rem;
+    background-color: azure;
+    position: fixed;
+    bottom: 15px;
+    left: 38%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 10px;
+}

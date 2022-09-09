@@ -1,14 +1,13 @@
 // External Package Imports
 import React, { useEffect } from 'react';
+import { HashRouter, BrowserRouter, Route, Routes } from 'react-router-dom';
 import { createRoot } from 'react-dom/client';
 import io from 'socket.io-client';
 import { Provider } from 'react-redux';
 import { store } from './store';
 
-import NavBar from './components/NavBar';
-import MainPage from './components/MainPage';
-import Chat from './components/Chat';
-import Lobby from './components/Lobby';
+import HomePage from './pages/HomePage';
+import GamePage from './pages/GamePage';
 
 import './styles/App.css';
 
@@ -27,11 +26,10 @@ const App = () => {
     }, []);
     return (
         <div>
-            <NavBar />
-            <MainPage>
-                <Lobby />
-                <Chat />
-            </MainPage>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/game/:roomId" element={<GamePage />} />
+            </Routes>
         </div>
     );
 };
@@ -39,6 +37,8 @@ const App = () => {
 const root = createRoot(document.querySelector('#root'));
 root.render(
     <Provider store={store}>
-        <App />
+        <HashRouter>
+            <App />
+        </HashRouter>
     </Provider>
 );

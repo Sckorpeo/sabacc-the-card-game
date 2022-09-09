@@ -1,0 +1,48 @@
+.PlayerCard {
+    height: 7.5rem;
+    width: 10rem;
+    background-color: dimgray;
+    border: solid 1px black;
+    border-radius: 5px;
+    position: fixed;
+}
+
+.PlayerCard > p {
+    vertical-align: bottom;
+}
+
+.PlayerCard-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.PlayerCard-username {
+    text-align: center;
+}
+
+.PlayerCard:nth-of-type(1) {
+    bottom: 200px;
+    left: 900px;
+}
+
+.PlayerCard:nth-of-type(2) {
+    top: 100px;
+    left: 700px;
+}
+
+.PlayerCard:nth-of-type(3) {
+    top: 100px;
+    left: 1100px;
+}
+
+.PlayerCard:nth-of-type(4) {
+    top: 400px;
+    left: 200px;
+}
+
+.PlayerCard:nth-of-type(5) {
+    top: 400px;
+    right: 200px;
+}

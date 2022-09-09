@@ -41,6 +41,7 @@ const Lobby = () => {
                         username={room.host.username}
                         players={room.players}
                         key={room.roomId}
+                        room={room}
                     />
                 ))}
             </div>

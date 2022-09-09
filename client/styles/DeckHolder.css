@@ -1,0 +1,12 @@
+.DeckHolder {
+    width: 12rem;
+    height: 10rem;
+    background-color: azure;
+    position: fixed;
+    bottom: 38%;
+    left: 46%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border-radius: 10px;
+}
