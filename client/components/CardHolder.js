@@ -4,13 +4,14 @@ import { useParams } from 'react-router-dom';
 import '../styles/CardHolder.css';
 import Card from './Card';
 
-const CardHolder = ({ hand = [], action, clearAction }) => {
+const CardHolder = ({ hand = null, action, clearAction }) => {
     const { roomId } = useParams();
     const { rooms } = useSelector((state) => state.rooms);
     const game = rooms.find((item) => item.roomId === roomId);
-    const playerHand = game.players.find(
-        (player) => player.socketId === window.socket.id
-    )?.hand;
+    const playerHand =
+        hand ||
+        game.players.find((player) => player.socketId === window.socket.id)
+            ?.hand;
     if (!game) {
         return <div>Loading..</div>;
     }

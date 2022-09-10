@@ -86,6 +86,7 @@ const GamePage = () => {
                                 gameStarted={game.gameStarted}
                                 gameEnded={game.gameOver}
                                 handTotal={player.handTotal}
+                                hand={player.hand}
                             />
                         )
                 )}
@@ -96,7 +97,7 @@ const GamePage = () => {
                         clearAction={() => setAction('')}
                     />
                 </div>
-                <Audio url={'public/assets/3._ilikethisroo'} />
+                {/* <Audio url={'public/assets/3._ilikethisroo'} /> */}
                 {game.host.socketId === window.socket.id && !game.gameStarted && (
                     <button
                         disabled={game.players.length < 2}

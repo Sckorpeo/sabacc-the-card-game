@@ -4432,7 +4432,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const CardHolder = ({
-  hand = [],
+  hand = null,
   action,
   clearAction
 }) => {
@@ -4443,7 +4443,7 @@ const CardHolder = ({
     rooms
   } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.rooms);
   const game = rooms.find(item => item.roomId === roomId);
-  const playerHand = game.players.find(player => player.socketId === window.socket.id)?.hand;
+  const playerHand = hand || game.players.find(player => player.socketId === window.socket.id)?.hand;
 
   if (!game) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Loading..");
@@ -4722,6 +4722,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _styles_PlayerCard_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/PlayerCard.css */ "./client/styles/PlayerCard.css");
+/* harmony import */ var _SeeHand__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SeeHand */ "./client/components/SeeHand.js");
+
 
 
 
@@ -4731,7 +4733,8 @@ const PlayerCard = ({
   gameStarted = false,
   handTotal = 0,
   youAreThePlayer = false,
-  gameEnded
+  gameEnded,
+  hand
 }) => {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "PlayerCard"
@@ -4741,7 +4744,9 @@ const PlayerCard = ({
     className: "PlayerCard-username"
   }, username), turn && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("i", {
     className: "far fa-compass fa-spin fa-3x"
-  })), gameStarted && (youAreThePlayer || gameEnded) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Hand Total: ", handTotal));
+  })), gameStarted && (youAreThePlayer || gameEnded) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Hand Total: ", handTotal), gameStarted && gameEnded && !youAreThePlayer && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_SeeHand__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    hand: hand
+  }));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerCard);
@@ -4790,6 +4795,59 @@ const RoomListItem = ({
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (RoomListItem);
+
+/***/ }),
+
+/***/ "./client/components/SeeHand.js":
+/*!**************************************!*\
+  !*** ./client/components/SeeHand.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _CardHolder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CardHolder */ "./client/components/CardHolder.js");
+
+
+
+const SeeHand = ({
+  hand
+}) => {
+  const [style, setStyle] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)({});
+  const [toggle, setToggle] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+
+  const handleMouseDown = ev => {
+    console.log(ev);
+    setStyle({
+      top: `${ev.screenY}`,
+      left: `${ev.screenX}`
+    });
+    console.log(style);
+    setToggle(true);
+  };
+
+  const handleMouseUp = () => {
+    setToggle(false);
+  };
+
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    onMouseDown: handleMouseDown,
+    onMouseUp: handleMouseUp,
+    style: {
+      height: '35px',
+      width: '80px'
+    }
+  }, !toggle && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "See Hand"), toggle && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_CardHolder__WEBPACK_IMPORTED_MODULE_1__["default"], {
+    hand: hand
+  }));
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (SeeHand);
 
 /***/ }),
 
@@ -5002,15 +5060,14 @@ const GamePage = () => {
       key: player.username,
       gameStarted: game.gameStarted,
       gameEnded: game.gameOver,
-      handTotal: player.handTotal
+      handTotal: player.handTotal,
+      hand: player.hand
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__["default"], {
       handleClick: handleClick
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_5__["default"], {
       action: action,
       clearAction: () => setAction('')
-    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_Audio__WEBPACK_IMPORTED_MODULE_7__["default"], {
-      url: 'public/assets/3._ilikethisroo'
-    }), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    })), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       disabled: game.players.length < 2,
       onClick: handleStart
     }, "Start Game"), game.curPlayer === window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
@@ -5666,7 +5723,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 15px;\n    left: 38%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.CardHolder-rounds {\n    position: fixed;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/CardHolder.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,YAAY;IACZ,SAAS;IACT,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB;;AAEA;IACI,eAAe;AACnB","sourcesContent":[".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 15px;\n    left: 38%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.CardHolder-rounds {\n    position: fixed;\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.CardHolder-rounds {\n    position: fixed;\n}\n\n.CardHolder:nth-of-type(2) {\n    bottom: 15px;\n    left: 38%;\n}\n\n.CardHolder:nth-of-type(1) {\n    left: -46%;\n    bottom: -38%;\n    z-index: 10;\n    position: relative;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/CardHolder.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB;;AAEA;IACI,eAAe;AACnB;;AAEA;IACI,YAAY;IACZ,SAAS;AACb;;AAEA;IACI,UAAU;IACV,YAAY;IACZ,WAAW;IACX,kBAAkB;AACtB","sourcesContent":[".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.CardHolder-rounds {\n    position: fixed;\n}\n\n.CardHolder:nth-of-type(2) {\n    bottom: 15px;\n    left: 38%;\n}\n\n.CardHolder:nth-of-type(1) {\n    left: -46%;\n    bottom: -38%;\n    z-index: 10;\n    position: relative;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -5720,7 +5777,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ":root {\n    --bottom-pos: 38%;\n    --left-pos: 46%;\n}\n\n.DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: var(--bottom-pos);\n    left: var(--left-pos);\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.DeckHolder-rounds {\n    position: fixed;\n    left: calc(var(--left-pos) + 4%);\n    bottom: calc(100% - var(--bottom-pos) - 5%);\n}\n", "",{"version":3,"sources":["webpack://./client/styles/DeckHolder.css"],"names":[],"mappings":"AAAA;IACI,iBAAiB;IACjB,eAAe;AACnB;;AAEA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,yBAAyB;IACzB,qBAAqB;IACrB,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB;;AAEA;IACI,eAAe;IACf,gCAAgC;IAChC,2CAA2C;AAC/C","sourcesContent":[":root {\n    --bottom-pos: 38%;\n    --left-pos: 46%;\n}\n\n.DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: var(--bottom-pos);\n    left: var(--left-pos);\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.DeckHolder-rounds {\n    position: fixed;\n    left: calc(var(--left-pos) + 4%);\n    bottom: calc(100% - var(--bottom-pos) - 5%);\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ":root {\n    --bottom-pos: 38%;\n    --left-pos: 46%;\n}\n\n.DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: var(--bottom-pos);\n    left: var(--left-pos);\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n    z-index: 0;\n}\n\n.DeckHolder-rounds {\n    position: fixed;\n    left: calc(var(--left-pos) + 4%);\n    bottom: calc(100% - var(--bottom-pos) - 5%);\n}\n", "",{"version":3,"sources":["webpack://./client/styles/DeckHolder.css"],"names":[],"mappings":"AAAA;IACI,iBAAiB;IACjB,eAAe;AACnB;;AAEA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,yBAAyB;IACzB,qBAAqB;IACrB,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;IACnB,UAAU;AACd;;AAEA;IACI,eAAe;IACf,gCAAgC;IAChC,2CAA2C;AAC/C","sourcesContent":[":root {\n    --bottom-pos: 38%;\n    --left-pos: 46%;\n}\n\n.DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: var(--bottom-pos);\n    left: var(--left-pos);\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n    z-index: 0;\n}\n\n.DeckHolder-rounds {\n    position: fixed;\n    left: calc(var(--left-pos) + 4%);\n    bottom: calc(100% - var(--bottom-pos) - 5%);\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
