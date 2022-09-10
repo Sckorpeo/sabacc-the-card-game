@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import '../styles/DeckHolder.css';
 import Card from './Card';
 
-const DeckHolder = () => {
+const DeckHolder = ({ handleClick }) => {
     const { roomId } = useParams();
     const { rooms } = useSelector((state) => state.rooms);
     const game = rooms.find((item) => item.roomId === roomId);
@@ -13,12 +13,20 @@ const DeckHolder = () => {
     }
     return (
         <div className="DeckHolder">
-            <Card cardBack={true} />
-            <Card
-                sign={game.discard[0]?.sign}
-                suit={game.discard[0]?.suit}
-                number={game.discard[0]?.imgNum}
-            />
+            <div
+                onClick={() => {
+                    handleClick('DECK');
+                }}
+            >
+                {game.gameStarted && <Card cardBack={true} />}
+            </div>
+            <div
+                onClick={() => {
+                    handleClick('DISCARD');
+                }}
+            >
+                {game.gameStarted && <Card card={game?.discard[0]} />}
+            </div>
         </div>
     );
 };

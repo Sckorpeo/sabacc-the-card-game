@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateRoom } from '../store/reducer/roomsReducer';
 import { useParams } from 'react-router-dom';
@@ -8,9 +8,10 @@ import PlayerCard from '../components/PlayerCard';
 import CardHolder from '../components/CardHolder';
 import DeckHolder from '../components/DeckHolder';
 
-import { initGame } from '../utils/gameFunctions';
+import { initGame, skipTurn } from '../utils/gameFunctions';
 
 const GamePage = () => {
+    const [action, setAction] = useState('');
     const dispatch = useDispatch();
     const { roomId } = useParams();
     const { rooms } = useSelector((state) => state.rooms);
@@ -24,15 +25,38 @@ const GamePage = () => {
             username: window.localStorage.getItem('username'),
         };
         window.socket.emit('roomJoin', roomId, player);
-
-        window.socket.on('gameUpdate', (game) => {
-            dispatch(updateRoom(game));
-        });
     }, []);
 
     const handleStart = () => {
         const gameCopy = JSON.parse(JSON.stringify(game));
         window.socket.emit('gameUpdate', initGame(gameCopy));
+    };
+
+    const handleSkip = () => {
+        const gameCopy = JSON.parse(JSON.stringify(game));
+        window.socket.emit('gameUpdate', skipTurn(gameCopy));
+    };
+
+    const handleClick = (word) => {
+        if (!game.gameStarted) {
+            return null;
+        } else if (game.curPlayer !== window.socket.id) {
+            window.alert(
+                'Please wait for current player to finish their turn.'
+            );
+            return null;
+        }
+        switch (word) {
+            case 'DECK':
+                window.alert('Choose a card from your hand to discard');
+                return setAction('DECK');
+            case 'DISCARD':
+                window.alert('Choose a card from your hand to trade');
+                return setAction('DISCARD');
+            default:
+                window.alert('Current action cleared.');
+                return setAction('');
+        }
     };
 
     if (!Object.keys(game).length) {
@@ -64,8 +88,8 @@ const GamePage = () => {
                         )
                 )}
                 <div>
-                    <DeckHolder />
-                    <CardHolder />
+                    <DeckHolder handleClick={handleClick} />
+                    <CardHolder action={action} />
                 </div>
                 {game.host.socketId === window.socket.id && !game.gameStarted && (
                     <button
@@ -76,7 +100,7 @@ const GamePage = () => {
                     </button>
                 )}
                 {game.curPlayer === window.socket.id && (
-                    <button>Skip Turn</button>
+                    <button onClick={handleSkip}>Skip Turn</button>
                 )}
             </div>
         );

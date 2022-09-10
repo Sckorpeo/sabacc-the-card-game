@@ -4313,29 +4313,41 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _styles_Card_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../styles/Card.css */ "./client/styles/Card.css");
+/* harmony import */ var _utils_gameFunctions__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/gameFunctions */ "./client/utils/gameFunctions.js");
+
 
 
 
 const Card = ({
-  sign,
-  suit,
-  number,
-  cardBack = false
+  card,
+  cardBack = false,
+  playerTurn = false,
+  game,
+  action
 }) => {
+  const handleClick = () => {
+    if (playerTurn && action === 'DECK') {
+      const gameCopy = JSON.parse(JSON.stringify(game));
+      window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_2__.discardAndDraw)(gameCopy, card));
+    }
+  };
+
   if (cardBack) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
       className: "Card",
       src: `public/assets/logo.png`
     });
-  } else if (number === '0') {
+  } else if (card?.imgNum === '0') {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
       className: "Card",
-      src: 'public/assets/sabacc_sylop_thumb.png'
+      src: 'public/assets/sabacc_sylop_thumb.png',
+      onClick: handleClick
     });
   } else {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("img", {
       className: "Card",
-      src: `public/assets/sabacc_${sign}_${suit}_${number}_thumb.png`
+      src: `public/assets/sabacc_${card?.sign}_${card?.suit}_${card?.imgNum}_thumb.png`,
+      onClick: handleClick
     });
   }
 };
@@ -4368,7 +4380,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const CardHolder = ({
-  hand = []
+  hand = [],
+  action
 }) => {
   const {
     roomId
@@ -4386,10 +4399,14 @@ const CardHolder = ({
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "CardHolder"
   }, playerHand?.map(card => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    card: card,
+    action: action,
     sign: card.sign,
     suit: card.suit,
     number: card.imgNum,
-    key: card.id
+    key: card.id,
+    playerTurn: game.curPlayer === window.socket.id,
+    game: game
   })));
 };
 
@@ -4488,7 +4505,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const DeckHolder = () => {
+const DeckHolder = ({
+  handleClick
+}) => {
   const {
     roomId
   } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_4__.useParams)();
@@ -4503,13 +4522,19 @@ const DeckHolder = () => {
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "DeckHolder"
-  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    onClick: () => {
+      handleClick('DECK');
+    }
+  }, game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
     cardBack: true
-  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
-    sign: game.discard[0]?.sign,
-    suit: game.discard[0]?.suit,
-    number: game.discard[0]?.imgNum
-  }));
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+    onClick: () => {
+      handleClick('DISCARD');
+    }
+  }, game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
+    card: game?.discard[0]
+  })));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DeckHolder);
@@ -4851,6 +4876,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const GamePage = () => {
+  const [action, setAction] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)('');
   const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
   const {
     roomId
@@ -4867,14 +4893,39 @@ const GamePage = () => {
       username: window.localStorage.getItem('username')
     };
     window.socket.emit('roomJoin', roomId, player);
-    window.socket.on('gameUpdate', game => {
-      dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_2__.updateRoom)(game));
-    });
   }, []);
 
   const handleStart = () => {
     const gameCopy = JSON.parse(JSON.stringify(game));
     window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__.initGame)(gameCopy));
+  };
+
+  const handleSkip = () => {
+    const gameCopy = JSON.parse(JSON.stringify(game));
+    window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__.skipTurn)(gameCopy));
+  };
+
+  const handleClick = word => {
+    if (!game.gameStarted) {
+      return null;
+    } else if (game.curPlayer !== window.socket.id) {
+      window.alert('Please wait for current player to finish their turn.');
+      return null;
+    }
+
+    switch (word) {
+      case 'DECK':
+        window.alert('Choose a card from your hand to discard');
+        return setAction('DECK');
+
+      case 'DISCARD':
+        window.alert('Choose a card from your hand to trade');
+        return setAction('DISCARD');
+
+      default:
+        window.alert('Current action cleared.');
+        return setAction('');
+    }
   };
 
   if (!Object.keys(game).length) {
@@ -4894,10 +4945,16 @@ const GamePage = () => {
       username: player.username,
       key: player.username,
       gameStarted: game.gameStarted
-    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__["default"], null), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_5__["default"], null)), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__["default"], {
+      handleClick: handleClick
+    }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_5__["default"], {
+      action: action
+    })), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       disabled: game.players.length < 2,
       onClick: handleStart
-    }, "Start Game"), game.curPlayer === window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", null, "Skip Turn"));
+    }, "Start Game"), game.curPlayer === window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: handleSkip
+    }, "Skip Turn"));
   }
 };
 
@@ -5290,8 +5347,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "addCardToHand": () => (/* binding */ addCardToHand),
 /* harmony export */   "discard": () => (/* binding */ discard),
+/* harmony export */   "discardAndDraw": () => (/* binding */ discardAndDraw),
 /* harmony export */   "draw": () => (/* binding */ draw),
-/* harmony export */   "initGame": () => (/* binding */ initGame)
+/* harmony export */   "initGame": () => (/* binding */ initGame),
+/* harmony export */   "skipTurn": () => (/* binding */ skipTurn)
 /* harmony export */ });
 /* harmony import */ var _cards__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./cards */ "./client/utils/cards.js");
 
@@ -5309,6 +5368,50 @@ const addCardToHand = (game = {}, playerId, card) => {
   curPlayer?.hand?.push(card);
   return game;
 };
+
+const skipTurn = game => {
+  const indexOfCurPlayer = game.players.findIndex(player => player.socketId === game.curPlayer);
+
+  if (game.players.length - 1 === indexOfCurPlayer) {
+    // This means its the end of the round
+    updateRound(game);
+
+    if (checkIfGameOver(game)) {
+      game.curPlayer = '';
+      return game;
+    }
+
+    game.curPlayer = game.players[0].socketId;
+  } else {
+    game.curPlayer = game.players[indexOfCurPlayer + 1].socketId;
+  }
+
+  return game;
+};
+
+const updateRound = game => {
+  game.round = game.round + 1;
+};
+
+const checkIfGameOver = game => {
+  const indexOfCurPlayer = game.players.findIndex(player => player.socketId === game.curPlayer);
+
+  if (game.players.length - 1 === indexOfCurPlayer && game.round === 3) {
+    game.gameOver = true;
+    return true;
+  }
+};
+
+const discardAndDraw = (game, card) => {
+  const curPlayer = game.players.find(player => player.socketId === game.curPlayer);
+  const drawnCard = draw(game);
+  curPlayer.hand = curPlayer.hand.map(cd => cd.id === card.id ? drawnCard : cd);
+  curPlayer.handTotal = getHandTotal(curPlayer.hand);
+  discard(game, card);
+  return skipTurn(game);
+};
+
+const tradeWithDiscard = (game, card) => {};
 
 const getHandTotal = hand => {
   return hand.reduce((reducer, card) => {
@@ -5335,7 +5438,9 @@ const initGame = (game = {}) => {
     }
 
     player.handTotal = getHandTotal(player.hand);
-  }); // set current player
+  }); // set the round
+
+  game.round = 1; // set current player
 
   game.curPlayer = game.players[0].socketId; // set game started
 
