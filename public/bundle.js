@@ -4329,6 +4329,9 @@ const Card = ({
     if (playerTurn && action === 'DECK') {
       const gameCopy = JSON.parse(JSON.stringify(game));
       window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_2__.discardAndDraw)(gameCopy, card));
+    } else if (playerTurn && action === 'DISCARD') {
+      const gameCopy = JSON.parse(JSON.stringify(game));
+      window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_2__.tradeWithDiscard)(gameCopy, card));
     }
   };
 
@@ -5350,7 +5353,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "discardAndDraw": () => (/* binding */ discardAndDraw),
 /* harmony export */   "draw": () => (/* binding */ draw),
 /* harmony export */   "initGame": () => (/* binding */ initGame),
-/* harmony export */   "skipTurn": () => (/* binding */ skipTurn)
+/* harmony export */   "skipTurn": () => (/* binding */ skipTurn),
+/* harmony export */   "tradeWithDiscard": () => (/* binding */ tradeWithDiscard)
 /* harmony export */ });
 /* harmony import */ var _cards__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./cards */ "./client/utils/cards.js");
 
@@ -5361,6 +5365,10 @@ const draw = game => {
 
 const discard = (game, card) => {
   return game.discard.unshift(card);
+};
+
+const discardDraw = game => {
+  return game.discard.shift();
 };
 
 const addCardToHand = (game = {}, playerId, card) => {
@@ -5411,7 +5419,14 @@ const discardAndDraw = (game, card) => {
   return skipTurn(game);
 };
 
-const tradeWithDiscard = (game, card) => {};
+const tradeWithDiscard = (game, card) => {
+  const curPlayer = game.players.find(player => player.socketId === game.curPlayer);
+  const discardTopCard = discardDraw(game);
+  curPlayer.hand = curPlayer.hand.map(cd => cd.id === card.id ? discardTopCard : cd);
+  curPlayer.handTotal = getHandTotal(curPlayer.hand);
+  discard(game, card);
+  return skipTurn(game);
+};
 
 const getHandTotal = hand => {
   return hand.reduce((reducer, card) => {

@@ -1,13 +1,16 @@
 import React from 'react';
 import '../styles/Card.css';
 
-import { discardAndDraw } from '../utils/gameFunctions';
+import { discardAndDraw, tradeWithDiscard } from '../utils/gameFunctions';
 
 const Card = ({ card, cardBack = false, playerTurn = false, game, action }) => {
     const handleClick = () => {
         if (playerTurn && action === 'DECK') {
             const gameCopy = JSON.parse(JSON.stringify(game));
             window.socket.emit('gameUpdate', discardAndDraw(gameCopy, card));
+        } else if (playerTurn && action === 'DISCARD') {
+            const gameCopy = JSON.parse(JSON.stringify(game));
+            window.socket.emit('gameUpdate', tradeWithDiscard(gameCopy, card));
         }
     };
 

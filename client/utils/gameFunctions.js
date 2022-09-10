@@ -8,6 +8,10 @@ const discard = (game, card) => {
     return game.discard.unshift(card);
 };
 
+const discardDraw = (game) => {
+    return game.discard.shift();
+};
+
 const addCardToHand = (game = {}, playerId, card) => {
     const curPlayer = game.players?.find(
         (player) => player.socketId === playerId
@@ -63,7 +67,18 @@ const discardAndDraw = (game, card) => {
     return skipTurn(game);
 };
 
-const tradeWithDiscard = (game, card) => {};
+const tradeWithDiscard = (game, card) => {
+    const curPlayer = game.players.find(
+        (player) => player.socketId === game.curPlayer
+    );
+    const discardTopCard = discardDraw(game);
+    curPlayer.hand = curPlayer.hand.map((cd) =>
+        cd.id === card.id ? discardTopCard : cd
+    );
+    curPlayer.handTotal = getHandTotal(curPlayer.hand);
+    discard(game, card);
+    return skipTurn(game);
+};
 
 const getHandTotal = (hand) => {
     return hand.reduce((reducer, card) => {
@@ -105,4 +120,12 @@ const initGame = (game = {}) => {
     return game;
 };
 
-export { draw, discard, addCardToHand, initGame, skipTurn, discardAndDraw };
+export {
+    draw,
+    discard,
+    addCardToHand,
+    initGame,
+    skipTurn,
+    discardAndDraw,
+    tradeWithDiscard,
+};
