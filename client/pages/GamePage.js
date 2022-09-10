@@ -96,7 +96,7 @@ const GamePage = () => {
                         clearAction={() => setAction('')}
                     />
                 </div>
-                <Audio url={'public/assets/3._ilikethisroom.mp3'} />
+                <Audio url={'public/assets/3._ilikethisroo'} />
                 {game.host.socketId === window.socket.id && !game.gameStarted && (
                     <button
                         disabled={game.players.length < 2}

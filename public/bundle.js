@@ -5008,7 +5008,7 @@ const GamePage = () => {
       action: action,
       clearAction: () => setAction('')
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_Audio__WEBPACK_IMPORTED_MODULE_7__["default"], {
-      url: 'public/assets/3._ilikethisroom.mp3'
+      url: 'public/assets/3._ilikethisroo'
     }), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       disabled: game.players.length < 2,
       onClick: handleStart
