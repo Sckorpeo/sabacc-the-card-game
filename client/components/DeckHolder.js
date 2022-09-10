@@ -12,22 +12,25 @@ const DeckHolder = ({ handleClick }) => {
         return <div>Loading..</div>;
     }
     return (
-        <div className="DeckHolder">
-            <div
-                onClick={() => {
-                    handleClick('DECK');
-                }}
-            >
-                {game.gameStarted && <Card cardBack={true} />}
+        <>
+            <p className="DeckHolder-rounds">Round -- {game.round}</p>
+            <div className="DeckHolder">
+                <div
+                    onClick={() => {
+                        handleClick('DECK');
+                    }}
+                >
+                    {game.gameStarted && <Card cardBack={true} />}
+                </div>
+                <div
+                    onClick={() => {
+                        handleClick('DISCARD');
+                    }}
+                >
+                    {game.gameStarted && <Card card={game?.discard[0]} />}
+                </div>
             </div>
-            <div
-                onClick={() => {
-                    handleClick('DISCARD');
-                }}
-            >
-                {game.gameStarted && <Card card={game?.discard[0]} />}
-            </div>
-        </div>
+        </>
     );
 };
 

@@ -7,6 +7,7 @@ const PlayerCard = ({
     gameStarted = false,
     handTotal = 0,
     youAreThePlayer = false,
+    gameEnded,
 }) => {
     return (
         <div className="PlayerCard">
@@ -14,7 +15,9 @@ const PlayerCard = ({
                 <div className="PlayerCard-username">{username}</div>
                 {turn && <i className="far fa-compass fa-spin fa-3x"></i>}
             </div>
-            {gameStarted && youAreThePlayer && <p>Hand Total: {handTotal}</p>}
+            {gameStarted && (youAreThePlayer || gameEnded) && (
+                <p>Hand Total: {handTotal}</p>
+            )}
         </div>
     );
 };

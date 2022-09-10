@@ -3,14 +3,23 @@ import '../styles/Card.css';
 
 import { discardAndDraw, tradeWithDiscard } from '../utils/gameFunctions';
 
-const Card = ({ card, cardBack = false, playerTurn = false, game, action }) => {
+const Card = ({
+    card,
+    cardBack = false,
+    playerTurn = false,
+    game,
+    action,
+    clearAction,
+}) => {
     const handleClick = () => {
         if (playerTurn && action === 'DECK') {
             const gameCopy = JSON.parse(JSON.stringify(game));
             window.socket.emit('gameUpdate', discardAndDraw(gameCopy, card));
+            clearAction();
         } else if (playerTurn && action === 'DISCARD') {
             const gameCopy = JSON.parse(JSON.stringify(game));
             window.socket.emit('gameUpdate', tradeWithDiscard(gameCopy, card));
+            clearAction();
         }
     };
 

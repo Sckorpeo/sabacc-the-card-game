@@ -1,12 +1,23 @@
+:root {
+    --bottom-pos: 38%;
+    --left-pos: 46%;
+}
+
 .DeckHolder {
     width: 12rem;
     height: 10rem;
     background-color: azure;
     position: fixed;
-    bottom: 38%;
-    left: 46%;
+    bottom: var(--bottom-pos);
+    left: var(--left-pos);
     display: flex;
     justify-content: space-around;
     align-items: center;
     border-radius: 10px;
+}
+
+.DeckHolder-rounds {
+    position: fixed;
+    left: calc(var(--left-pos) + 4%);
+    bottom: calc(100% - var(--bottom-pos) - 5%);
 }

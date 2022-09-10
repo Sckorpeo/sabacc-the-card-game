@@ -7,6 +7,7 @@ import '../styles/GamePage.css';
 import PlayerCard from '../components/PlayerCard';
 import CardHolder from '../components/CardHolder';
 import DeckHolder from '../components/DeckHolder';
+import Audio from '../components/Audio';
 
 import { initGame, skipTurn } from '../utils/gameFunctions';
 
@@ -54,7 +55,6 @@ const GamePage = () => {
                 window.alert('Choose a card from your hand to trade');
                 return setAction('DISCARD');
             default:
-                window.alert('Current action cleared.');
                 return setAction('');
         }
     };
@@ -84,13 +84,19 @@ const GamePage = () => {
                                 username={player.username}
                                 key={player.username}
                                 gameStarted={game.gameStarted}
+                                gameEnded={game.gameOver}
+                                handTotal={player.handTotal}
                             />
                         )
                 )}
                 <div>
                     <DeckHolder handleClick={handleClick} />
-                    <CardHolder action={action} />
+                    <CardHolder
+                        action={action}
+                        clearAction={() => setAction('')}
+                    />
                 </div>
+                <Audio url={'public/assets/3._ilikethisroom.mp3'} />
                 {game.host.socketId === window.socket.id && !game.gameStarted && (
                     <button
                         disabled={game.players.length < 2}
@@ -102,6 +108,11 @@ const GamePage = () => {
                 {game.curPlayer === window.socket.id && (
                     <button onClick={handleSkip}>Skip Turn</button>
                 )}
+                {game.host.socketId === window.socket.id &&
+                    game.gameStarted &&
+                    game.gameOver && (
+                        <button onClick={handleStart}>Reset</button>
+                    )}
             </div>
         );
     }

@@ -29,7 +29,6 @@ const App = () => {
     }, []);
     useEffect(() => {
         window.socket.on('roomsUpdate', (rooms) => {
-            console.log('Received', { rooms });
             dispatch(setRooms(rooms));
         });
         window.socket.on('gameUpdate', (game) => {

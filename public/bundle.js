@@ -4299,6 +4299,52 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./client/components/Audio.js":
+/*!************************************!*\
+  !*** ./client/components/Audio.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const useAudio = url => {
+  const [audio] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(new Audio(url));
+  const [playing, setPlaying] = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false);
+
+  const toggle = () => setPlaying(!playing);
+
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    playing ? audio.play() : audio.pause();
+  }, [playing]);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
+    audio.addEventListener('ended', () => setPlaying(false));
+    return () => {
+      audio.removeEventListener('ended', () => setPlaying(false));
+    };
+  }, []);
+  return [playing, toggle];
+};
+
+const MusicPlayer = ({
+  url
+}) => {
+  const [playing, toggle] = useAudio(url);
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+    onClick: toggle
+  }, playing ? 'Pause' : 'Play'));
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MusicPlayer);
+
+/***/ }),
+
 /***/ "./client/components/Card.js":
 /*!***********************************!*\
   !*** ./client/components/Card.js ***!
@@ -4323,15 +4369,18 @@ const Card = ({
   cardBack = false,
   playerTurn = false,
   game,
-  action
+  action,
+  clearAction
 }) => {
   const handleClick = () => {
     if (playerTurn && action === 'DECK') {
       const gameCopy = JSON.parse(JSON.stringify(game));
       window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_2__.discardAndDraw)(gameCopy, card));
+      clearAction();
     } else if (playerTurn && action === 'DISCARD') {
       const gameCopy = JSON.parse(JSON.stringify(game));
       window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_2__.tradeWithDiscard)(gameCopy, card));
+      clearAction();
     }
   };
 
@@ -4384,7 +4433,8 @@ __webpack_require__.r(__webpack_exports__);
 
 const CardHolder = ({
   hand = [],
-  action
+  action,
+  clearAction
 }) => {
   const {
     roomId
@@ -4404,12 +4454,10 @@ const CardHolder = ({
   }, playerHand?.map(card => /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
     card: card,
     action: action,
-    sign: card.sign,
-    suit: card.suit,
-    number: card.imgNum,
     key: card.id,
     playerTurn: game.curPlayer === window.socket.id,
-    game: game
+    game: game,
+    clearAction: clearAction
   })));
 };
 
@@ -4523,7 +4571,9 @@ const DeckHolder = ({
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, "Loading..");
   }
 
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", {
+    className: "DeckHolder-rounds"
+  }, "Round -- ", game.round), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "DeckHolder"
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     onClick: () => {
@@ -4537,7 +4587,7 @@ const DeckHolder = ({
     }
   }, game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_Card__WEBPACK_IMPORTED_MODULE_3__["default"], {
     card: game?.discard[0]
-  })));
+  }))));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DeckHolder);
@@ -4679,7 +4729,8 @@ const PlayerCard = ({
   turn = false,
   gameStarted = false,
   handTotal = 0,
-  youAreThePlayer = false
+  youAreThePlayer = false,
+  gameEnded
 }) => {
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", {
     className: "PlayerCard"
@@ -4689,7 +4740,7 @@ const PlayerCard = ({
     className: "PlayerCard-username"
   }, username), turn && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("i", {
     className: "far fa-compass fa-spin fa-3x"
-  })), gameStarted && youAreThePlayer && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Hand Total: ", handTotal));
+  })), gameStarted && (youAreThePlayer || gameEnded) && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("p", null, "Hand Total: ", handTotal));
 };
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (PlayerCard);
@@ -4862,12 +4913,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_redux__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
 /* harmony import */ var _store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../store/reducer/roomsReducer */ "./client/store/reducer/roomsReducer.js");
-/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
+/* harmony import */ var react_router_dom__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router/index.js");
 /* harmony import */ var _styles_GamePage_css__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../styles/GamePage.css */ "./client/styles/GamePage.css");
 /* harmony import */ var _components_PlayerCard__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/PlayerCard */ "./client/components/PlayerCard.js");
 /* harmony import */ var _components_CardHolder__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/CardHolder */ "./client/components/CardHolder.js");
 /* harmony import */ var _components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../components/DeckHolder */ "./client/components/DeckHolder.js");
-/* harmony import */ var _utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../utils/gameFunctions */ "./client/utils/gameFunctions.js");
+/* harmony import */ var _components_Audio__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../components/Audio */ "./client/components/Audio.js");
+/* harmony import */ var _utils_gameFunctions__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../utils/gameFunctions */ "./client/utils/gameFunctions.js");
+
 
 
 
@@ -4883,7 +4936,7 @@ const GamePage = () => {
   const dispatch = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useDispatch)();
   const {
     roomId
-  } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_8__.useParams)();
+  } = (0,react_router_dom__WEBPACK_IMPORTED_MODULE_9__.useParams)();
   const {
     rooms
   } = (0,react_redux__WEBPACK_IMPORTED_MODULE_1__.useSelector)(state => state.rooms);
@@ -4900,12 +4953,12 @@ const GamePage = () => {
 
   const handleStart = () => {
     const gameCopy = JSON.parse(JSON.stringify(game));
-    window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__.initGame)(gameCopy));
+    window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_8__.initGame)(gameCopy));
   };
 
   const handleSkip = () => {
     const gameCopy = JSON.parse(JSON.stringify(game));
-    window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_7__.skipTurn)(gameCopy));
+    window.socket.emit('gameUpdate', (0,_utils_gameFunctions__WEBPACK_IMPORTED_MODULE_8__.skipTurn)(gameCopy));
   };
 
   const handleClick = word => {
@@ -4926,7 +4979,6 @@ const GamePage = () => {
         return setAction('DISCARD');
 
       default:
-        window.alert('Current action cleared.');
         return setAction('');
     }
   };
@@ -4947,17 +4999,24 @@ const GamePage = () => {
       turn: game.curPlayer === player.socketId,
       username: player.username,
       key: player.username,
-      gameStarted: game.gameStarted
+      gameStarted: game.gameStarted,
+      gameEnded: game.gameOver,
+      handTotal: player.handTotal
     })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("div", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_DeckHolder__WEBPACK_IMPORTED_MODULE_6__["default"], {
       handleClick: handleClick
     }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_CardHolder__WEBPACK_IMPORTED_MODULE_5__["default"], {
-      action: action
-    })), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      action: action,
+      clearAction: () => setAction('')
+    })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components_Audio__WEBPACK_IMPORTED_MODULE_7__["default"], {
+      url: 'public/assets/3._ilikethisroom.mp3'
+    }), game.host.socketId === window.socket.id && !game.gameStarted && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       disabled: game.players.length < 2,
       onClick: handleStart
     }, "Start Game"), game.curPlayer === window.socket.id && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
       onClick: handleSkip
-    }, "Skip Turn"));
+    }, "Skip Turn"), game.host.socketId === window.socket.id && game.gameStarted && game.gameOver && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement("button", {
+      onClick: handleStart
+    }, "Reset"));
   }
 };
 
@@ -5404,8 +5463,9 @@ const updateRound = game => {
 const checkIfGameOver = game => {
   const indexOfCurPlayer = game.players.findIndex(player => player.socketId === game.curPlayer);
 
-  if (game.players.length - 1 === indexOfCurPlayer && game.round === 3) {
+  if (game.players.length - 1 === indexOfCurPlayer && game.round === 4) {
     game.gameOver = true;
+    window.alert('Game Over!');
     return true;
   }
 };
@@ -5447,6 +5507,8 @@ const initGame = (game = {}) => {
   discard(game, draw(game)); // deal 5 cards to each player
 
   game.players.forEach(player => {
+    player.hand = [];
+
     while (player.hand.length < 6) {
       let card = draw(game);
       addCardToHand(game, player.socketId, card);
@@ -5460,6 +5522,7 @@ const initGame = (game = {}) => {
   game.curPlayer = game.players[0].socketId; // set game started
 
   game.gameStarted = true;
+  game.gameOver = false;
   return game;
 };
 
@@ -5602,7 +5665,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 15px;\n    left: 38%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/CardHolder.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,YAAY;IACZ,SAAS;IACT,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB","sourcesContent":[".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 15px;\n    left: 38%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 15px;\n    left: 38%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.CardHolder-rounds {\n    position: fixed;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/CardHolder.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,YAAY;IACZ,SAAS;IACT,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB;;AAEA;IACI,eAAe;AACnB","sourcesContent":[".CardHolder {\n    width: 30rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 15px;\n    left: 38%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.CardHolder-rounds {\n    position: fixed;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -5656,7 +5719,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 38%;\n    left: 46%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n", "",{"version":3,"sources":["webpack://./client/styles/DeckHolder.css"],"names":[],"mappings":"AAAA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,WAAW;IACX,SAAS;IACT,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB","sourcesContent":[".DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: 38%;\n    left: 46%;\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n"],"sourceRoot":""}]);
+___CSS_LOADER_EXPORT___.push([module.id, ":root {\n    --bottom-pos: 38%;\n    --left-pos: 46%;\n}\n\n.DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: var(--bottom-pos);\n    left: var(--left-pos);\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.DeckHolder-rounds {\n    position: fixed;\n    left: calc(var(--left-pos) + 4%);\n    bottom: calc(100% - var(--bottom-pos) - 5%);\n}\n", "",{"version":3,"sources":["webpack://./client/styles/DeckHolder.css"],"names":[],"mappings":"AAAA;IACI,iBAAiB;IACjB,eAAe;AACnB;;AAEA;IACI,YAAY;IACZ,aAAa;IACb,uBAAuB;IACvB,eAAe;IACf,yBAAyB;IACzB,qBAAqB;IACrB,aAAa;IACb,6BAA6B;IAC7B,mBAAmB;IACnB,mBAAmB;AACvB;;AAEA;IACI,eAAe;IACf,gCAAgC;IAChC,2CAA2C;AAC/C","sourcesContent":[":root {\n    --bottom-pos: 38%;\n    --left-pos: 46%;\n}\n\n.DeckHolder {\n    width: 12rem;\n    height: 10rem;\n    background-color: azure;\n    position: fixed;\n    bottom: var(--bottom-pos);\n    left: var(--left-pos);\n    display: flex;\n    justify-content: space-around;\n    align-items: center;\n    border-radius: 10px;\n}\n\n.DeckHolder-rounds {\n    position: fixed;\n    left: calc(var(--left-pos) + 4%);\n    bottom: calc(100% - var(--bottom-pos) - 5%);\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -50482,9 +50545,6 @@ const App = () => {
   }, []);
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(() => {
     window.socket.on('roomsUpdate', rooms => {
-      console.log('Received', {
-        rooms
-      });
       dispatch((0,_store_reducer_roomsReducer__WEBPACK_IMPORTED_MODULE_5__.setRooms)(rooms));
     });
     window.socket.on('gameUpdate', game => {

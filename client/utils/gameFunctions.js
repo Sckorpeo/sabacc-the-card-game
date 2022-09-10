@@ -48,8 +48,9 @@ const checkIfGameOver = (game) => {
         (player) => player.socketId === game.curPlayer
     );
 
-    if (game.players.length - 1 === indexOfCurPlayer && game.round === 3) {
+    if (game.players.length - 1 === indexOfCurPlayer && game.round === 4) {
         game.gameOver = true;
+        window.alert('Game Over!');
         return true;
     }
 };
@@ -101,6 +102,7 @@ const initGame = (game = {}) => {
 
     // deal 5 cards to each player
     game.players.forEach((player) => {
+        player.hand = [];
         while (player.hand.length < 6) {
             let card = draw(game);
             addCardToHand(game, player.socketId, card);
@@ -116,6 +118,7 @@ const initGame = (game = {}) => {
 
     // set game started
     game.gameStarted = true;
+    game.gameOver = false;
 
     return game;
 };
