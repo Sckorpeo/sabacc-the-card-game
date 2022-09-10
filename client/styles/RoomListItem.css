@@ -4,7 +4,14 @@
     width: 90%;
     justify-content: space-around;
     align-items: center;
-    border-radius: 5px;
-    border: 1px solid green;
     margin-top: 1rem;
+    padding: 10px;
+    border-bottom: 1px solid grey;
+    background: linear-gradient(
+        to left top,
+        hsla(0, 0%, 100%, 0.3),
+        hsla(0, 0%, 100%, 0.7)
+    );
+    border-radius: 20px;
+    margin-top: 1em;
 }

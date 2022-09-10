@@ -36,7 +36,13 @@ const App = () => {
         });
     }, []);
     return (
-        <div>
+        <div
+            className="App"
+            style={{
+                backgroundImage:
+                    "url('public/assets/sabacc_full_background.a3f1aec7.jpeg')",
+            }}
+        >
             <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/game/:roomId" element={<GamePage />} />

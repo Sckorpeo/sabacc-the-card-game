@@ -9,9 +9,31 @@
 .Lobby-room-list {
     width: 100%;
     height: 90%;
-    border: 1px grey solid;
     overflow: scroll;
     display: flex;
     flex-direction: column;
     align-items: center;
+    background: linear-gradient(
+        to left top,
+        hsla(0, 0%, 100%, 0.3),
+        hsla(0, 0%, 100%, 0.7)
+    );
+    border-radius: 10px;
+}
+
+.Lobby-room-list::-webkit-scrollbar {
+    background: none;
+}
+
+.Lobby-room-list::-webkit-scrollbar-corner {
+    background: none;
+}
+
+.Lobby-room-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+        to left top,
+        hsla(0, 0%, 100%, 0.3),
+        hsla(0, 0%, 100%, 0.7)
+    );
+    border-radius: 10px;
 }

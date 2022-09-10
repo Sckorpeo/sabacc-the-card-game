@@ -45,6 +45,7 @@ io.on('connection', (socket) => {
     });
     socket.on('roomCreated', (room) => {
         rooms.push(room);
+        console.log(rooms);
         io.emit('roomsUpdate', rooms);
     });
     socket.on('roomJoin', (roomId, player) => {
@@ -53,6 +54,10 @@ io.on('connection', (socket) => {
         io.emit('roomsUpdate', rooms);
     });
     socket.on('gameUpdate', (game) => {
+        rooms = rooms.map((room) =>
+            room.roomId === game.roomId ? game : room
+        );
+        console.log(rooms);
         io.emit('gameUpdate', game);
     });
     socket.on('disconnect', () => {

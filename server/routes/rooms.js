@@ -3,6 +3,7 @@ let rooms = require('../logic/rooms');
 
 router.get('/', (req, res, next) => {
     try {
+        console.log(rooms);
         res.send(rooms);
     } catch (ex) {
         next(ex);

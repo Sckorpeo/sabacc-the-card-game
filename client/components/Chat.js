@@ -30,7 +30,15 @@ const Chat = () => {
         <div className="Chat">
             <ul className="Chat-messages" id="chat">
                 {chat.map((msg, i) => (
-                    <li key={i}>
+                    <li
+                        key={i}
+                        className={
+                            msg.username ===
+                            window.localStorage.getItem('username')
+                                ? 'Chatter'
+                                : null
+                        }
+                    >
                         {msg.username}: {msg.message}
                     </li>
                 ))}
